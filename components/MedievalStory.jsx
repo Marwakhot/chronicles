@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import React, { useState } from 'react';
 import { ArrowLeft, Heart, Skull, Cross, AlertTriangle, Users } from 'lucide-react';
 
@@ -18,12 +19,31 @@ const MedievalStory = ({ onBack }) => {
     }));
   };
 
-  const makeChoice = (nextScene, choiceText, statChanges = {}) => {
-    setChoices([...choices, choiceText]);
+  const { saveProgress, isAuthenticated } = useAuth();
+
+useEffect(() => {
+  if (isAuthenticated && currentScene === 'intro') {
+    saveProgress('medieval-plague', null, [], stats);
+  }
+}, [isAuthenticated]);
+
+
+  const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
+  setChoices([...choices, choiceText]);
     updateStats(statChanges);
     setCurrentScene(nextScene);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    
+  if (isAuthenticated) {
+    const newStats = { /* calculate new stats */ };
+    const nextSceneData = scenes[nextScene];
+    if (nextSceneData?.isEnding) {
+      await saveProgress('medieval-plague', nextScene, newChoices, newStats);
+    } else {
+      await saveProgress('medieval-plague', null, newChoices, newStats);
+    }
+  }
+};
 
   const scenes = {
     intro: {
