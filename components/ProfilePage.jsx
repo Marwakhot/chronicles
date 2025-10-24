@@ -137,4 +137,56 @@ const ProfilePage = ({ onBack }) => {
             <div className="text-amber-400/80 text-sm">Choices Made</div>
           </div>
 
-          <div className="bg-gradient-to-br from-
+          <div className="bg-gradient-to-br from-stone-900/80 to-amber-950/60 backdrop-blur-sm border-2 border-amber-800/60 rounded-xl p-6 text-center">
+            <Award className="w-12 h-12 text-yellow-400 mx-auto mb-3" />
+            <div className="text-4xl font-bold text-amber-300 mb-2">
+              {stats.endingsUnlocked?.length || 0}
+            </div>
+            <div className="text-amber-400/80 text-sm">Endings Unlocked</div>
+          </div>
+
+          <div className="bg-gradient-to-br from-stone-900/80 to-amber-950/60 backdrop-blur-sm border-2 border-amber-800/60 rounded-xl p-6 text-center">
+            <User className="w-12 h-12 text-blue-400 mx-auto mb-3" />
+            <div className="text-4xl font-bold text-amber-300 mb-2">
+              {stats.storiesStarted}
+            </div>
+            <div className="text-amber-400/80 text-sm">Stories Started</div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-stone-900/80 to-amber-950/60 backdrop-blur-sm border-2 border-amber-800/60 rounded-xl p-8">
+          <h2 className="text-2xl font-serif font-bold text-amber-300 mb-6">
+            Achievements & Badges
+          </h2>
+          
+          <div className="grid md:grid-cols-3 gap-4">
+            {stats.endingsUnlocked?.length > 0 ? (
+              stats.endingsUnlocked.map((ending, index) => (
+                <div
+                  key={index}
+                  className="bg-amber-900/20 border border-amber-700/40 rounded-lg p-4 flex items-center gap-3"
+                >
+                  <Award className="w-8 h-8 text-amber-400" />
+                  <div>
+                    <div className="text-amber-300 font-semibold">
+                      Ending Unlocked
+                    </div>
+                    <div className="text-amber-400/60 text-sm">
+                      {ending}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-8 text-amber-400/60">
+                Complete stories to unlock achievements!
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfilePage;
