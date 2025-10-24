@@ -11,13 +11,15 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    // Check for token in localStorage
-    const storedToken = localStorage.getItem('auth_token');
-    if (storedToken) {
-      setToken(storedToken);
-      fetchProfile(storedToken);
-    } else {
-      setLoading(false);
+    // Check for token in localStorage on mount
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('auth_token');
+      if (storedToken) {
+        setToken(storedToken);
+        fetchProfile(storedToken);
+      } else {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -34,11 +36,19 @@ export function AuthProvider({ children }) {
         setUser(data.user);
       } else {
         // Token invalid, clear it
-        localStorage.removeItem('auth_token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+        }
         setToken(null);
+        setUser(null);
       }
     } catch (error) {
       console.error('Profile fetch error:', error);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+      }
+      setToken(null);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -57,9 +67,12 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('auth_token', data.token);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', data.token);
+        }
         setToken(data.token);
         setUser(data.user);
+        await fetchProfile(data.token);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -82,7 +95,9 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('auth_token', data.token);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_token', data.token);
+        }
         setToken(data.token);
         setUser(data.user);
         await fetchProfile(data.token);
@@ -96,7 +111,9 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+    }
     setToken(null);
     setUser(null);
   };
@@ -138,6 +155,7 @@ export function AuthProvider({ children }) {
       });
 
       if (response.ok) {
+        // Refresh profile to get updated stats
         await fetchProfile(token);
         return { success: true };
       } else {
