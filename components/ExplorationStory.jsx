@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import React, { useState } from 'react';
 import { ArrowLeft, Compass, Heart, Skull, AlertTriangle, Ship } from 'lucide-react';
 
@@ -17,13 +18,30 @@ const ExplorationStory = ({ onBack }) => {
       survival: Math.max(0, Math.min(100, prev.survival + (statChanges.survival || 0)))
     }));
   };
+  const { saveProgress, isAuthenticated } = useAuth();
 
-  const makeChoice = (nextScene, choiceText, statChanges = {}) => {
-    setChoices([...choices, choiceText]);
+useEffect(() => {
+  if (isAuthenticated && currentScene === 'intro') {
+    saveProgress('exploration-conquest', null, [], stats);
+  }
+}, [isAuthenticated]);
+
+  const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
+  setChoices([...choices, choiceText]);
     updateStats(statChanges);
     setCurrentScene(nextScene);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  
+  if (isAuthenticated) {
+    const newStats = { /* calculate new stats */ };
+    const nextSceneData = scenes[nextScene];
+    if (nextSceneData?.isEnding) {
+      await saveProgress('exploration-conquest', nextScene, newChoices, newStats);
+    } else {
+      await saveProgress('exploration-conquest', null, newChoices, newStats);
+    }
+  }
+};
 
   const scenes = {
     intro: {
