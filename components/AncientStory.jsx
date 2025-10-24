@@ -37,9 +37,9 @@ useEffect(() => {
     const newStats = { /* calculate new stats */ };
     const nextSceneData = scenes[nextScene];
     if (nextSceneData?.isEnding) {
-      await saveProgress('YOUR-STORY-ID', nextScene, newChoices, newStats);
+      await saveProgress('ancient-caesar', nextScene, newChoices, newStats);
     } else {
-      await saveProgress('YOUR-STORY-ID', null, newChoices, newStats);
+      await saveProgress('ancient-caesar', null, newChoices, newStats);
     }
   }
 };
