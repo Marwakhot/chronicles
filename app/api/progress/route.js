@@ -19,34 +19,75 @@ export async function POST(request) {
 
     const users = await getCollection('users');
     
-    // Update user stats
+    // Check if this is the first time starting this story
+    const user = await users.findOne({ _id: new ObjectId(userId) });
+    const progress = await getCollection('progress');
+    const existingProgress = await progress.findOne({
+      userId: new ObjectId(userId),
+      storyId: storyId
+    });
+
     const updateData = {
-      $inc: {
-        'profile.stats.totalChoices': choices ? choices.length : 0
-      },
+      $inc: {},
       $addToSet: {}
     };
 
-    if (endingId) {
-      updateData.$addToSet['profile.stats.endingsUnlocked'] = `${storyId}-${endingId}`;
-      updateData.$inc['profile.stats.storiesFinished'] = 1;
+    // If this is the first choice in a story, increment storiesStarted
+    if (!existingProgress && choices.length === 0) {
+      updateData.$inc['profile.stats.storiesStarted'] = 1;
     }
 
-    const result = await users.updateOne(
+    // Increment totalChoices if there are new choices
+    if (choices && choices.length > 0) {
+      const previousChoiceCount = user.profile?.stats?.totalChoices || 0;
+      updateData.$inc['profile.stats.totalChoices'] = choices.length;
+    }
+
+    // If there's an ending, add it and increment storiesFinished
+    if (endingId) {
+      const endingKey = `${storyId}-${endingId}`;
+      
+      // Check if this ending was already unlocked
+      const alreadyUnlocked = user.profile?.stats?.endingsUnlocked?.includes(endingKey);
+      
+      if (!alreadyUnlocked) {
+        updateData.$addToSet['profile.stats.endingsUnlocked'] = endingKey;
+      }
+      
+      // Check if this story was already completed
+      const alreadyCompleted = user.profile?.storiesCompleted?.includes(storyId);
+      
+      if (!alreadyCompleted) {
+        updateData.$inc['profile.stats.storiesFinished'] = 1;
+        updateData.$addToSet['profile.storiesCompleted'] = storyId;
+      }
+    }
+
+    // Update user stats
+    await users.updateOne(
       { _id: new ObjectId(userId) },
       updateData
     );
 
-    // Save progress to separate collection
-    const progress = await getCollection('progress');
-    await progress.insertOne({
-      userId: new ObjectId(userId),
-      storyId,
-      endingId,
-      choices,
-      stats,
-      completedAt: new Date()
-    });
+    // Save or update progress
+    await progress.updateOne(
+      {
+        userId: new ObjectId(userId),
+        storyId: storyId
+      },
+      {
+        $set: {
+          userId: new ObjectId(userId),
+          storyId,
+          endingId: endingId || null,
+          choices,
+          stats,
+          lastUpdated: new Date(),
+          completedAt: endingId ? new Date() : null
+        }
+      },
+      { upsert: true }
+    );
 
     return NextResponse.json({
       success: true,
@@ -76,7 +117,7 @@ export async function GET(request) {
     const progress = await getCollection('progress');
     const userProgress = await progress
       .find({ userId: new ObjectId(userId) })
-      .sort({ completedAt: -1 })
+      .sort({ lastUpdated: -1 })
       .limit(50)
       .toArray();
 
