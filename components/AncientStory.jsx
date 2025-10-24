@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import React, { useState } from 'react';
 import { ArrowLeft, Scroll, Heart, Skull, Crown, AlertTriangle } from 'lucide-react';
 
@@ -18,12 +19,30 @@ const AncientStory = ({ onBack }) => {
     }));
   };
 
-  const makeChoice = (nextScene, choiceText, statChanges = {}) => {
-    setChoices([...choices, choiceText]);
+  const { saveProgress, isAuthenticated } = useAuth();
+
+useEffect(() => {
+  if (isAuthenticated && currentScene === 'intro') {
+    saveProgress('ancient-caesar', null, [], stats);
+  }
+}, [isAuthenticated]);
+
+  const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
+  setChoices([...choices, choiceText]);
     updateStats(statChanges);
     setCurrentScene(nextScene);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  
+  if (isAuthenticated) {
+    const newStats = { /* calculate new stats */ };
+    const nextSceneData = scenes[nextScene];
+    if (nextSceneData?.isEnding) {
+      await saveProgress('YOUR-STORY-ID', nextScene, newChoices, newStats);
+    } else {
+      await saveProgress('YOUR-STORY-ID', null, newChoices, newStats);
+    }
+  }
+};
 
   const scenes = {
     intro: {
