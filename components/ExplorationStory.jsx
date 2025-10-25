@@ -1,7 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
+import CommentsSection from './CommentsSection';
 import HistoricalInfoModal from './HistoricalInfoModal';
-import { ArrowLeft, Scroll, Heart, Skull, Crown, AlertTriangle, BookOpen, Info } from 'lucide-react';
+import { ArrowLeft, Compass, Heart, Skull, AlertTriangle, BookOpen, Info } from 'lucide-react';
 
 const ExplorationStory = ({ onBack }) => {
   const [currentScene, setCurrentScene] = useState('intro');
@@ -1378,7 +1379,7 @@ useEffect(() => {
           <div>
             <div className="flex items-center justify-between mb-1">
               <span className="text-amber-300 text-sm flex items-center gap-2">
-                <Ship className="w-4 h-4" />
+                <Compass className="w-4 h-4" />
                 Loyalty
               </span>
               <span className="text-amber-200 text-sm font-bold">{stats.loyalty}%</span>
