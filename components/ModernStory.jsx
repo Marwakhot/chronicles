@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Zap, Heart, AlertTriangle, Shield, Radio } from 'lucide-react';
 
 const ModernStory = ({ onBack }) => {
