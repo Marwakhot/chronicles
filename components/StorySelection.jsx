@@ -9,6 +9,8 @@ import ModernStory from './ModernStory';
 const StorySelection = ({ timeline, onBack, onBackToTimeline }) => {
   const [selectedStory, setSelectedStory] = useState(null);
 
+  console.log('StorySelection props:', { timeline, hasOnBack: !!onBack, hasOnBackToTimeline: !!onBackToTimeline });
+
   const stories = {
     ancient: [
       {
@@ -77,12 +79,16 @@ const StorySelection = ({ timeline, onBack, onBackToTimeline }) => {
   };
 
   if (selectedStory) {
-    const StoryComponent = selectedStory.component;
-    return <StoryComponent 
-      onBack={() => setSelectedStory(null)} 
-      onBackToTimeline={onBackToTimeline}
-    />;
-  }
+  const StoryComponent = selectedStory.component;
+  console.log('Rendering story with onBackToTimeline');
+  return <StoryComponent 
+    onBack={() => setSelectedStory(null)} 
+    onBackToTimeline={() => {
+      console.log('Story calling onBackToTimeline');
+      onBackToTimeline();
+    }}
+  />;
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-900 via-amber-900 to-black relative overflow-hidden">
       {/* Decorative background elements */}
