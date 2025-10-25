@@ -7,7 +7,6 @@ export async function POST(request) {
   try {
     const { email, password, username } = await request.json();
 
-    // Validation
     if (!email || !password || !username) {
       return NextResponse.json(
         { error: 'Email, password, and username are required' },
@@ -22,7 +21,6 @@ export async function POST(request) {
       );
     }
 
-    // Check if user exists
     const users = await getCollection('users');
     const existingUser = await users.findOne({
       $or: [{ email }, { username }]
@@ -35,11 +33,9 @@ export async function POST(request) {
       );
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create user
-    const result = await users.insertOne({
+    const newUser = {
       email,
       username,
       password: hashedPassword,
@@ -56,18 +52,22 @@ export async function POST(request) {
           endingsUnlocked: []
         }
       }
-    });
+    };
 
-    // Generate token
+    const result = await users.insertOne(newUser);
+
     const token = generateToken(result.insertedId.toString());
 
+    // Return complete user object
     return NextResponse.json({
       success: true,
       token,
       user: {
         id: result.insertedId.toString(),
-        email,
-        username
+        email: newUser.email,
+        username: newUser.username,
+        profile: newUser.profile,
+        createdAt: newUser.createdAt
       }
     }, { status: 201 });
 
