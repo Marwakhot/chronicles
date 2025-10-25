@@ -1,4 +1,4 @@
-// contexts/AuthContext.js - COMPLETE FIXED VERSION
+// contexts/AuthContext.js - WORKING VERSION
 'use client';
 
 import { createContext, useContext, useState, useEffect } from 'react';
@@ -9,10 +9,19 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [isClient, setIsClient] = useState(false);
 
-  // Load token and fetch profile on mount
+  // Ensure we're on the client
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Load token and fetch profile
+  useEffect(() => {
+    if (!isClient) return;
+
     const storedToken = localStorage.getItem('auth_token');
+    console.log('Checking for stored token:', storedToken ? 'Found' : 'Not found');
     
     if (storedToken) {
       setToken(storedToken);
@@ -20,9 +29,10 @@ export function AuthProvider({ children }) {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [isClient]);
 
   const fetchProfile = async (authToken) => {
+    console.log('Fetching profile with token...');
     try {
       const response = await fetch('/api/profile', {
         headers: {
@@ -30,26 +40,31 @@ export function AuthProvider({ children }) {
         }
       });
 
+      console.log('Profile response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('Profile data received:', data.user);
         setUser(data.user);
+        setLoading(false);
       } else {
-        // Token is invalid
+        console.log('Profile fetch failed, clearing token');
         localStorage.removeItem('auth_token');
         setToken(null);
         setUser(null);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Profile fetch error:', error);
       localStorage.removeItem('auth_token');
       setToken(null);
       setUser(null);
-    } finally {
       setLoading(false);
     }
   };
 
   const signup = async (email, password, username) => {
+    console.log('Signing up...');
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -60,11 +75,13 @@ export function AuthProvider({ children }) {
       });
 
       const data = await response.json();
+      console.log('Signup response:', data);
 
       if (response.ok) {
         localStorage.setItem('auth_token', data.token);
         setToken(data.token);
         setUser(data.user);
+        console.log('User set after signup:', data.user);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -76,6 +93,7 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (email, password) => {
+    console.log('Logging in...');
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -86,11 +104,13 @@ export function AuthProvider({ children }) {
       });
 
       const data = await response.json();
+      console.log('Login response:', data);
 
       if (response.ok) {
         localStorage.setItem('auth_token', data.token);
         setToken(data.token);
         setUser(data.user);
+        console.log('User set after login:', data.user);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -102,14 +122,19 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    console.log('Logging out...');
     localStorage.removeItem('auth_token');
     setToken(null);
     setUser(null);
   };
 
   const updateProfile = async (bio, avatar) => {
-    if (!token) return { success: false, error: 'Not authenticated' };
+    if (!token) {
+      console.log('No token for update');
+      return { success: false, error: 'Not authenticated' };
+    }
 
+    console.log('Updating profile...');
     try {
       const response = await fetch('/api/profile', {
         method: 'PUT',
@@ -121,7 +146,7 @@ export function AuthProvider({ children }) {
       });
 
       if (response.ok) {
-        // Refresh profile data
+        console.log('Profile updated, refreshing...');
         await fetchProfile(token);
         return { success: true };
       } else {
@@ -129,16 +154,18 @@ export function AuthProvider({ children }) {
         return { success: false, error: data.error };
       }
     } catch (error) {
+      console.error('Update profile error:', error);
       return { success: false, error: 'Network error' };
     }
   };
 
   const saveProgress = async (storyId, endingId, choices, stats) => {
     if (!token) {
-      console.log('No token, skipping progress save');
+      console.log('No token, cannot save progress');
       return { success: false, error: 'Not authenticated' };
     }
 
+    console.log('Saving progress:', { storyId, endingId, choicesCount: choices.length });
     try {
       const response = await fetch('/api/progress', {
         method: 'POST',
@@ -149,12 +176,14 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ storyId, endingId, choices, stats })
       });
 
+      const data = await response.json();
+      console.log('Progress save response:', data);
+
       if (response.ok) {
-        // Refresh profile to get updated stats
+        console.log('Progress saved, refreshing profile...');
         await fetchProfile(token);
         return { success: true };
       } else {
-        const data = await response.json();
         console.error('Progress save failed:', data.error);
         return { success: false, error: data.error };
       }
@@ -163,6 +192,17 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Network error' };
     }
   };
+
+  console.log('Auth State:', { 
+    hasUser: !!user, 
+    hasToken: !!token, 
+    loading, 
+    username: user?.username 
+  });
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <AuthContext.Provider value={{
