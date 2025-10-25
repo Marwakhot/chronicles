@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 import HistoricalInfoModal from './HistoricalInfoModal';
-import { ArrowLeft, Heart, Skull, Factory, AlertTriangle, Hammer } from 'lucide-react';
+import { ArrowLeft, Zap, Heart, AlertTriangle, Shield, Radio, BookOpen, Info } from 'lucide-react';
 
 const IndustrialStory = ({ onBack }) => {
   const [currentScene, setCurrentScene] = useState('intro');
