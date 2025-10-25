@@ -36,11 +36,14 @@ useEffect(() => {
   
   if (isAuthenticated) {
     const newStats = {
-      loyalty: Math.max(0, Math.min(100, stats.loyalty + (statChanges.loyalty || 0))),
-      morality: Math.max(0, Math.min(100, stats.morality + (statChanges.morality || 0))),
-      influence: Math.max(0, Math.min(100, stats.influence + (statChanges.influence || 0)))
+      // USE THE CORRECT STAT NAMES FOR EACH STORY
+      statName1: Math.max(0, Math.min(100, stats.loyalty + (statChanges.loyalty || 0))),
+      statName2: Math.max(0, Math.min(100, stats.morality + (statChanges.morality || 0))),
+      statName3: Math.max(0, Math.min(100, stats.influence + (statChanges.influence || 0)))
     };
+    
     const nextSceneData = scenes[nextScene];
+    
     if (nextSceneData?.isEnding) {
       await saveProgress('ancient-caesar', nextScene, newChoices, newStats);
     } else {
