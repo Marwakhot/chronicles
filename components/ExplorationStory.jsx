@@ -1547,6 +1547,13 @@ useEffect(() => {
                 </button>
               </div>
             )}
+            {/* Comments Section */}
+            {currentSceneData.isEnding && (
+              <CommentsSection 
+                storyId="medieval-plague" 
+                storyTitle="The Black Death"
+              />
+            )}
           </div>
         </div>
 
