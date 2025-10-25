@@ -1,4 +1,4 @@
-// app/api/profile/route.js
+// app/api/profile/route.js - FIXED VERSION
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth';
@@ -7,8 +7,10 @@ import { ObjectId } from 'mongodb';
 export async function GET(request) {
   try {
     const userId = getUserFromRequest(request);
+    console.log('Profile GET - userId:', userId);
 
     if (!userId) {
+      console.log('Profile GET - No userId, returning 401');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -20,6 +22,8 @@ export async function GET(request) {
       { _id: new ObjectId(userId) },
       { projection: { password: 0 } }
     );
+
+    console.log('Profile GET - User found:', !!user);
 
     if (!user) {
       return NextResponse.json(
@@ -51,8 +55,10 @@ export async function GET(request) {
 export async function PUT(request) {
   try {
     const userId = getUserFromRequest(request);
+    console.log('Profile PUT - userId:', userId);
 
     if (!userId) {
+      console.log('Profile PUT - No userId, returning 401');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -60,6 +66,7 @@ export async function PUT(request) {
     }
 
     const { bio, avatar } = await request.json();
+    console.log('Profile PUT - bio:', bio);
 
     const users = await getCollection('users');
     const updateData = {};
@@ -76,6 +83,8 @@ export async function PUT(request) {
       { _id: new ObjectId(userId) },
       { $set: updateData }
     );
+
+    console.log('Profile PUT - Update result:', result.matchedCount);
 
     if (result.matchedCount === 0) {
       return NextResponse.json(
