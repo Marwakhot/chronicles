@@ -608,6 +608,13 @@ useEffect(() => {
                 </button>
               </div>
             )}
+            {/* Comments Section */}
+{currentSceneData.isEnding && (
+  <CommentsSection 
+  storyId="modern-chernobyl" 
+  storyTitle="Chernobyl Disaster"
+/>
+)}
           </div>
         </div>
 
