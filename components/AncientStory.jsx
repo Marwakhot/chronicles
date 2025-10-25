@@ -5,6 +5,7 @@ import HistoricalInfoModal from './HistoricalInfoModal';
 import { ArrowLeft, Scroll, Heart, Skull, Crown, AlertTriangle, BookOpen, Info } from 'lucide-react';
 
 const AncientStory = ({ onBack, onBackToTimeline }) => {
+  console.log('AncientStory props:', { hasOnBack: !!onBack, hasOnBackToTimeline: !!onBackToTimeline });
   const [currentScene, setCurrentScene] = useState('intro');
   const [choices, setChoices] = useState([]);
   const [stats, setStats] = useState({
@@ -1173,11 +1174,14 @@ useEffect(() => {
         Play Again
       </button>
       <button
-        onClick={onBack}
-        className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
-      >
-        Choose Different Timeline
-      </button>
+  onClick={() => {
+    console.log('Choose Different Timeline clicked');
+    onBackToTimeline();
+  }}
+  className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
+>
+  Choose Different Timeline
+</button>
     </div>
   </div>
 )}
