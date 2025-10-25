@@ -672,7 +672,7 @@ const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
           <Skull className="w-16 h-16 text-purple-400 mx-auto mb-4" />
           <p className="text-xl mb-4">Scene not found: {currentScene}</p>
           <button
-        onClick={onBack}
+        onClick={onBackToTimeline}
         className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
       >
         Choose Different Timeline
