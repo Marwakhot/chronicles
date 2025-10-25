@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 import HistoricalInfoModal from './HistoricalInfoModal';
-import { ArrowLeft, Heart, Skull, Cross, AlertTriangle, Users } from 'lucide-react';
+import { ArrowLeft, Zap, Heart, AlertTriangle, Shield, Radio, BookOpen, Info } from 'lucide-react';
 
 const MedievalStory = ({ onBack }) => {
   const [currentScene, setCurrentScene] = useState('intro');
