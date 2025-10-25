@@ -28,13 +28,18 @@ useEffect(() => {
 }, [isAuthenticated]);
 
   const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
-  setChoices([...choices, choiceText]);
-    updateStats(statChanges);
-    setCurrentScene(nextScene);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const newChoices = [...choices, choiceText];
+  setChoices(newChoices);
+  updateStats(statChanges);
+  setCurrentScene(nextScene);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   
   if (isAuthenticated) {
-    const newStats = { /* calculate new stats */ };
+    const newStats = {
+      loyalty: Math.max(0, Math.min(100, stats.loyalty + (statChanges.loyalty || 0))),
+      morality: Math.max(0, Math.min(100, stats.morality + (statChanges.morality || 0))),
+      influence: Math.max(0, Math.min(100, stats.influence + (statChanges.influence || 0)))
+    };
     const nextSceneData = scenes[nextScene];
     if (nextSceneData?.isEnding) {
       await saveProgress('ancient-caesar', nextScene, newChoices, newStats);
