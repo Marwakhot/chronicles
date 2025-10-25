@@ -871,13 +871,15 @@ const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
         className="flex-1 px-6 py-3 bg-amber-700 hover:bg-amber-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
       >
         Play Again
-      </button>
       <button
-        onClick={onBack}
-        className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
-      >
-        Choose Different Timeline
-      </button>
+  onClick={() => {
+    console.log('Choose Different Timeline clicked');
+    onBackToTimeline();
+  }}
+  className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
+>
+  Choose Different Timeline
+</button>
     </div>
   </div>
 )}
