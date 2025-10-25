@@ -1206,17 +1206,18 @@ useEffect(() => {
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
-      `}</style>
-    </div>
-    {/* Historical Info Modal */}
+      {/* Historical Info Modal */}
       <HistoricalInfoModal 
         isOpen={showHistoricalInfo}
         onClose={() => setShowHistoricalInfo(false)}
         storyId="ancient-caesar"
       />
+
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+      `}</style>
+    </div>
+    
   );
 };
 
