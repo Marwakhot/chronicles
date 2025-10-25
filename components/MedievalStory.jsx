@@ -28,7 +28,7 @@ useEffect(() => {
 }, [isAuthenticated, currentScene]);
 
 
-  const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
+const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
   const newChoices = [...choices, choiceText];
   setChoices(newChoices);
   updateStats(statChanges);
@@ -37,11 +37,14 @@ useEffect(() => {
   
   if (isAuthenticated) {
     const newStats = {
-      faith: Math.max(0, Math.min(100, stats.faith + (statChanges.faith || 0))),
-      compassion: Math.max(0, Math.min(100, stats.compassion + (statChanges.compassion || 0))),
-      survival: Math.max(0, Math.min(100, stats.survival + (statChanges.survival || 0)))
+      // USE THE CORRECT STAT NAMES FOR EACH STORY
+      statName1: Math.max(0, Math.min(100, stats.statName1 + (statChanges.statName1 || 0))),
+      statName2: Math.max(0, Math.min(100, stats.statName2 + (statChanges.statName2 || 0))),
+      statName3: Math.max(0, Math.min(100, stats.statName3 + (statChanges.statName3 || 0)))
     };
+    
     const nextSceneData = scenes[nextScene];
+    
     if (nextSceneData?.isEnding) {
       await saveProgress('medieval-plague', nextScene, newChoices, newStats);
     } else {
@@ -49,7 +52,6 @@ useEffect(() => {
     }
   }
 };
-
   const scenes = {
     intro: {
       title: "The Pestilence Arrives",
