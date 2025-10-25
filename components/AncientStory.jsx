@@ -1166,7 +1166,7 @@ useEffect(() => {
         onClick={() => {
           setCurrentScene('intro');
           setChoices([]);
-          setStats({ /* your stats */ });
+          setStats({loyalty: 50, morality: 50, influence: 30});
         }}
         className="flex-1 px-6 py-3 bg-amber-700 hover:bg-amber-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
       >
@@ -1211,6 +1211,12 @@ useEffect(() => {
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
       `}</style>
     </div>
+    {/* Historical Info Modal */}
+      <HistoricalInfoModal 
+        isOpen={showHistoricalInfo}
+        onClose={() => setShowHistoricalInfo(false)}
+        storyId="ancient-caesar"
+      />
   );
 };
 
