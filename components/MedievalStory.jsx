@@ -1,6 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 import HistoricalInfoModal from './HistoricalInfoModal';
+import CommentsSection from './CommentsSection';
 import { ArrowLeft, Heart, Skull, AlertTriangle, Users, BookOpen, Info } from 'lucide-react';
 
 const MedievalStory = ({ onBack }) => {
