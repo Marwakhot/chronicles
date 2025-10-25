@@ -78,9 +78,11 @@ const StorySelection = ({ timeline, onBack }) => {
 
   if (selectedStory) {
     const StoryComponent = selectedStory.component;
-    return <StoryComponent onBack={() => setSelectedStory(null)} />;
+    return <StoryComponent 
+      onBack={() => setSelectedStory(null)} 
+      onBackToTimeline={onBack}
+    />;
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-900 via-amber-900 to-black relative overflow-hidden">
       {/* Decorative background elements */}
