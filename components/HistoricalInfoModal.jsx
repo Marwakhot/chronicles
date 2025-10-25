@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { X, BookOpen, ExternalLink, Info } from 'lucide-react';
+import { X, BookOpen, ExternalLink } from 'lucide-react';
 
 const HistoricalInfoModal = ({ isOpen, onClose, storyId }) => {
   if (!isOpen) return null;
@@ -73,7 +75,7 @@ const HistoricalInfoModal = ({ isOpen, onClose, storyId }) => {
       ],
       funFacts: [
         "The plague returned in waves for centuries; London had a major outbreak in 1665-1666.",
-        "Ring Around the Rosie' may reference plague symptoms, though this is debated by historians.",
+        "'Ring Around the Rosie' may reference plague symptoms, though this is debated by historians.",
         "Plague doctors wore distinctive beak-like masks filled with herbs, believing bad air ('miasma') caused disease.",
         "The plague killed so many clergy that standards for becoming a priest dropped significantly.",
         "Some historians argue the Black Death's labor shortage was a key factor in ending serfdom and advancing human rights."
