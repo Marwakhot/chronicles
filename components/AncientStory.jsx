@@ -4,7 +4,7 @@ import CommentsSection from './CommentsSection';
 import HistoricalInfoModal from './HistoricalInfoModal';
 import { ArrowLeft, Scroll, Heart, Skull, Crown, AlertTriangle, BookOpen, Info } from 'lucide-react';
 
-const AncientStory = ({ onBack }) => {
+const AncientStory = ({ onBack, onBackToTimeline }) => {
   const [currentScene, setCurrentScene] = useState('intro');
   const [choices, setChoices] = useState([]);
   const [stats, setStats] = useState({
@@ -970,12 +970,12 @@ useEffect(() => {
         <div className="text-white text-center p-8">
           <Skull className="w-16 h-16 text-amber-400 mx-auto mb-4" />
           <p className="text-xl mb-4">Scene not found: {currentScene}</p>
-          <button 
-            onClick={onBack} 
-            className="px-6 py-3 bg-amber-700 hover:bg-amber-600 rounded-lg transition-all"
-          >
-            Return to Timeline
-          </button>
+          <button
+        onClick={onBackToTimeline}
+        className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
+      >
+        Choose Different Timeline
+      </button>
         </div>
       </div>
     );
