@@ -1,7 +1,7 @@
 // app/page.js
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import LandingPage from '@/components/LandingPage';
 import WelcomePage from '@/components/WelcomePage';
@@ -16,7 +16,7 @@ export default function Home() {
   const [selectedTimeline, setSelectedTimeline] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, loading } = useAuth();
 
   const handleEnter = () => {
     setCurrentPage('welcome');
@@ -54,9 +54,17 @@ export default function Home() {
     setCurrentPage('profile');
   };
 
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-stone-900 via-amber-900 to-black flex items-center justify-center">
+        <div className="text-amber-300 text-2xl font-serif">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <main className="w-full min-h-screen relative">
-      {/* Auth/Profile Navigation */}
       {currentPage !== 'landing' && (
         <div className="fixed top-4 left-4 z-50 flex items-center gap-3">
           {isAuthenticated ? (
