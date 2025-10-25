@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
+import CommentsSection from './CommentsSection';
 import HistoricalInfoModal from './HistoricalInfoModal';
 import { ArrowLeft, Zap, Heart, AlertTriangle, Shield, Radio, BookOpen, Info } from 'lucide-react';
 
