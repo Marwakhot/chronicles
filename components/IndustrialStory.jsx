@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Heart, Skull, Factory, AlertTriangle, Hammer } from 'lucide-react';
 
 const IndustrialStory = ({ onBack }) => {
