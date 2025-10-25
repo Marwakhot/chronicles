@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 import HistoricalInfoModal from './HistoricalInfoModal';
 import CommentsSection from './CommentsSection';
-import { ArrowLeft, Heart, Skull, AlertTriangle, Hammer, BookOpen, Info } from 'lucide-react';
+import { ArrowLeft, Heart, Skull, AlertTriangle, Hammer, BookOpen, Info, Building2 } from 'lucide-react';
 
 const IndustrialStory = ({ onBack }) => {
   const [currentScene, setCurrentScene] = useState('intro');
@@ -903,7 +903,7 @@ useEffect(() => {
           <div className="bg-gradient-to-r from-gray-900 to-stone-900 p-6 border-b-2 border-gray-800/60">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
-                <Factory className="w-8 h-8 text-gray-300" />
+                <Building2 className="w-8 h-8 text-gray-300" />
                 <div>
                   <h2 className="text-3xl font-serif font-bold text-gray-300">
                     {currentSceneData.title}
