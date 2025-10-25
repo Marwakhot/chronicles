@@ -7,7 +7,6 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json();
 
-    // Validation
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -15,7 +14,6 @@ export async function POST(request) {
       );
     }
 
-    // Find user
     const users = await getCollection('users');
     const user = await users.findOne({ email });
 
@@ -26,7 +24,6 @@ export async function POST(request) {
       );
     }
 
-    // Compare password
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
@@ -36,16 +33,18 @@ export async function POST(request) {
       );
     }
 
-    // Generate token
     const token = generateToken(user._id.toString());
 
+    // Return complete user object including profile
     return NextResponse.json({
       success: true,
       token,
       user: {
         id: user._id.toString(),
         email: user.email,
-        username: user.username
+        username: user.username,
+        profile: user.profile,
+        createdAt: user.createdAt
       }
     });
 
