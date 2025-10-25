@@ -1,0 +1,234 @@
+// components/CommentsSection.jsx
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { MessageSquare, Send, Trash2, User, Clock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+
+const CommentsSection = ({ storyId, storyTitle }) => {
+  const { user, isAuthenticated } = useAuth();
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchComments();
+    // Poll for new comments every 10 seconds
+    const interval = setInterval(fetchComments, 10000);
+    return () => clearInterval(interval);
+  }, [storyId]);
+
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`/api/comments?storyId=${storyId}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setComments(data.comments);
+      }
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated) {
+      setError('Please sign in to comment');
+      return;
+    }
+
+    if (newComment.trim().length === 0) {
+      setError('Please enter a comment');
+      return;
+    }
+
+    if (newComment.length > 500) {
+      setError('Comment must be 500 characters or less');
+      return;
+    }
+
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          storyId,
+          comment: newComment
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setNewComment('');
+        fetchComments(); // Refresh comments
+      } else {
+        setError(data.error || 'Failed to post comment');
+      }
+    } catch (error) {
+      console.error('Error posting comment:', error);
+      setError('Failed to post comment');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/comments?commentId=${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        fetchComments(); // Refresh comments
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
+  return (
+    <div className="mt-12 bg-stone-900/60 backdrop-blur-sm border-2 border-amber-800/60 rounded-xl p-6">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <MessageSquare className="w-6 h-6 text-amber-400" />
+        <h3 className="text-2xl font-serif font-bold text-amber-300">
+          Discussion
+        </h3>
+        <span className="text-amber-400/60 text-sm">
+          ({comments.length} {comments.length === 1 ? 'comment' : 'comments'})
+        </span>
+      </div>
+
+      {/* Comment Form */}
+      {isAuthenticated ? (
+        <form onSubmit={handleSubmitComment} className="mb-6">
+          <div className="mb-3">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value.slice(0, 500))}
+              placeholder={`Share your thoughts about ${storyTitle}...`}
+              className="w-full px-4 py-3 bg-stone-800/50 border border-amber-800/40 rounded-lg text-amber-100 placeholder-amber-600 focus:outline-none focus:border-amber-600 transition-colors resize-none"
+              rows="3"
+              maxLength={500}
+            />
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-amber-400/60 text-xs">
+                {newComment.length}/500 characters
+              </span>
+              {error && (
+                <span className="text-red-400 text-xs">{error}</span>
+              )}
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={submitting || newComment.trim().length === 0}
+            className="flex items-center gap-2 px-6 py-2 bg-amber-700 hover:bg-amber-600 disabled:bg-stone-700 disabled:cursor-not-allowed text-white rounded-lg transition-all"
+          >
+            <Send className="w-4 h-4" />
+            {submitting ? 'Posting...' : 'Post Comment'}
+          </button>
+        </form>
+      ) : (
+        <div className="mb-6 p-4 bg-amber-900/20 border border-amber-700/40 rounded-lg text-center">
+          <p className="text-amber-300">
+            Sign in to join the discussion and share your thoughts
+          </p>
+        </div>
+      )}
+
+      {/* Comments List */}
+      <div className="space-y-4">
+        {loading ? (
+          <div className="text-center py-8 text-amber-400/60">
+            Loading comments...
+          </div>
+        ) : comments.length === 0 ? (
+          <div className="text-center py-8 text-amber-400/60">
+            No comments yet. Be the first to share your thoughts!
+          </div>
+        ) : (
+          comments.map((comment) => (
+            <div
+              key={comment._id}
+              className="bg-stone-800/30 border border-amber-800/30 rounded-lg p-4"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-amber-200" />
+                  </div>
+                  <div>
+                    <p className="text-amber-300 font-semibold">
+                      {comment.username}
+                    </p>
+                    <div className="flex items-center gap-2 text-amber-400/60 text-xs">
+                      <Clock className="w-3 h-3" />
+                      <span>{formatDate(comment.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Delete button (only for comment author) */}
+                {user && comment.userId === user.id && (
+                  <button
+                    onClick={() => handleDeleteComment(comment._id)}
+                    className="text-red-400 hover:text-red-300 transition-colors"
+                    title="Delete comment"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              
+              <p className="text-amber-200 leading-relaxed ml-13">
+                {comment.comment}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CommentsSection;
