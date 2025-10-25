@@ -29,18 +29,23 @@ useEffect(() => {
 
 
   const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
-  setChoices([...choices, choiceText]);
-    updateStats(statChanges);
-    setCurrentScene(nextScene);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const newChoices = [...choices, choiceText];
+  setChoices(newChoices);
+  updateStats(statChanges);
+  setCurrentScene(nextScene);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   
   if (isAuthenticated) {
-    const newStats = { /* calculate new stats */ };
+    const newStats = {
+      duty: Math.max(0, Math.min(100, stats.duty + (statChanges.duty || 0))),
+      survival: Math.max(0, Math.min(100, stats.survival + (statChanges.survival || 0))),
+      truth: Math.max(0, Math.min(100, stats.truth + (statChanges.truth || 0)))
+    };
     const nextSceneData = scenes[nextScene];
     if (nextSceneData?.isEnding) {
-      await saveProgress('YOUR-STORY-ID', nextScene, newChoices, newStats);
+      await saveProgress('modern-chernobyl', nextScene, newChoices, newStats);
     } else {
-      await saveProgress('YOUR-STORY-ID', null, newChoices, newStats);
+      await saveProgress('modern-chernobyl', null, newChoices, newStats);
     }
   }
 };
