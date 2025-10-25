@@ -1550,9 +1550,9 @@ useEffect(() => {
             {/* Comments Section */}
             {currentSceneData.isEnding && (
               <CommentsSection 
-                storyId="medieval-plague" 
-                storyTitle="The Black Death"
-              />
+  storyId="exploration-conquest" 
+  storyTitle="Voyage of the Unknown"
+/>
             )}
           </div>
         </div>
