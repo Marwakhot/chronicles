@@ -28,13 +28,18 @@ useEffect(() => {
 }, [isAuthenticated]);
   
   const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
-  setChoices([...choices, choiceText]);
-    updateStats(statChanges);
-    setCurrentScene(nextScene);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const newChoices = [...choices, choiceText];
+  setChoices(newChoices);
+  updateStats(statChanges);
+  setCurrentScene(nextScene);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
   
   if (isAuthenticated) {
-    const newStats = { /* calculate new stats */ };
+    const newStats = {
+      solidarity: Math.max(0, Math.min(100, stats.solidarity + (statChanges.solidarity || 0))),
+      courage: Math.max(0, Math.min(100, stats.courage + (statChanges.courage || 0))),
+      survival: Math.max(0, Math.min(100, stats.survival + (statChanges.survival || 0)))
+    };
     const nextSceneData = scenes[nextScene];
     if (nextSceneData?.isEnding) {
       await saveProgress('industrial-revolution', nextScene, newChoices, newStats);
@@ -43,7 +48,6 @@ useEffect(() => {
     }
   }
 };
-
   const scenes = {
     intro: {
       title: "First Day at the Mill",
