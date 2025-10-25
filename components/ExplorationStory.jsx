@@ -1588,7 +1588,7 @@ useEffect(() => {
       <HistoricalInfoModal 
   isOpen={showHistoricalInfo}
   onClose={() => setShowHistoricalInfo(false)}
-  storyId="medieval-plague"
+  storyId="exploration-conquest"
 />
 
       <style jsx>{`
