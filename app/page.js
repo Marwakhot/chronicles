@@ -32,13 +32,18 @@ export default function Home() {
   };
 
   const handleBack = () => {
-    if (currentPage === 'stories') {
-      setCurrentPage('timeline');
-      setSelectedTimeline(null);
-    } else if (currentPage === 'profile') {
-      setCurrentPage('timeline');
-    }
-  };
+  if (currentPage === 'stories') {
+    setCurrentPage('timeline');
+    setSelectedTimeline(null);
+  } else if (currentPage === 'profile') {
+    setCurrentPage('timeline');
+  }
+};
+
+const handleBackToTimeline = () => {
+  setCurrentPage('timeline');
+  setSelectedTimeline(null);
+};
 
   const openAuthModal = (mode) => {
     setAuthMode(mode);
@@ -105,7 +110,7 @@ export default function Home() {
       {currentPage === 'landing' && <LandingPage onEnter={handleEnter} />}
       {currentPage === 'welcome' && <WelcomePage onContinue={handleContinue} />}
       {currentPage === 'timeline' && <TimelineSelection onSelectTimeline={handleSelectTimeline} />}
-      {currentPage === 'stories' && <StorySelection timeline={selectedTimeline} onBack={handleBack} />}
+      {currentPage === 'stories' && <StorySelection timeline={selectedTimeline} onBack={handleBack} onBackToTimeline={handleBackToTimeline} />}
       {currentPage === 'profile' && <ProfilePage onBack={handleBack} />}
 
       <AuthModal
