@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 import HistoricalInfoModal from './HistoricalInfoModal';
-import { ArrowLeft, Zap, Heart, AlertTriangle, Shield, Radio, BookOpen, Info } from 'lucide-react';
+import { ArrowLeft, Heart, Skull, AlertTriangle, Users, BookOpen, Info } from 'lucide-react';
 
 const MedievalStory = ({ onBack }) => {
   const [currentScene, setCurrentScene] = useState('intro');
@@ -698,7 +698,7 @@ const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
           <div>
             <div className="flex items-center justify-between mb-1">
               <span className="text-purple-300 text-sm flex items-center gap-2">
-                <Cross className="w-4 h-4" />
+                <BookOpen className="w-4 h-4" />
                 Faith
               </span>
               <span className="text-purple-200 text-sm font-bold">{stats.faith}%</span>
