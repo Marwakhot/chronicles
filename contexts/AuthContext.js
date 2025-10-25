@@ -9,19 +9,23 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check for token in localStorage on mount
-    if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('auth_token');
-      if (storedToken) {
-        setToken(storedToken);
-        fetchProfile(storedToken);
-      } else {
-        setLoading(false);
-      }
-    }
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const storedToken = localStorage.getItem('auth_token');
+    if (storedToken) {
+      setToken(storedToken);
+      fetchProfile(storedToken);
+    } else {
+      setLoading(false);
+    }
+  }, [mounted]);
 
   const fetchProfile = async (authToken) => {
     try {
@@ -35,18 +39,13 @@ export function AuthProvider({ children }) {
         const data = await response.json();
         setUser(data.user);
       } else {
-        // Token invalid, clear it
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('auth_token');
-        }
+        localStorage.removeItem('auth_token');
         setToken(null);
         setUser(null);
       }
     } catch (error) {
       console.error('Profile fetch error:', error);
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-      }
+      localStorage.removeItem('auth_token');
       setToken(null);
       setUser(null);
     } finally {
@@ -67,11 +66,8 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('auth_token', data.token);
-        }
+        localStorage.setItem('auth_token', data.token);
         setToken(data.token);
-        setUser(data.user);
         await fetchProfile(data.token);
         return { success: true };
       } else {
@@ -95,11 +91,8 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('auth_token', data.token);
-        }
+        localStorage.setItem('auth_token', data.token);
         setToken(data.token);
-        setUser(data.user);
         await fetchProfile(data.token);
         return { success: true };
       } else {
@@ -111,14 +104,14 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-    }
+    localStorage.removeItem('auth_token');
     setToken(null);
     setUser(null);
   };
 
   const updateProfile = async (bio, avatar) => {
+    if (!token) return { success: false, error: 'Not authenticated' };
+
     try {
       const response = await fetch('/api/profile', {
         method: 'PUT',
@@ -155,7 +148,6 @@ export function AuthProvider({ children }) {
       });
 
       if (response.ok) {
-        // Refresh profile to get updated stats
         await fetchProfile(token);
         return { success: true };
       } else {
@@ -166,6 +158,11 @@ export function AuthProvider({ children }) {
       return { success: false, error: 'Network error' };
     }
   };
+
+  // Don't render children until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <AuthContext.Provider value={{
