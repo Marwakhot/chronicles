@@ -867,6 +867,13 @@ const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
                 </button>
               </div>
             )}
+            {/* Comments Section */}
+{currentSceneData.isEnding && (
+  <CommentsSection 
+  storyId="medieval-plague" 
+  storyTitle="The Black Death"
+/>
+)}
           </div>
         </div>
 
