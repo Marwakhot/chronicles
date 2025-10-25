@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
+import HistoricalInfoModal from './HistoricalInfoModal';
 import { ArrowLeft, Zap, Heart, AlertTriangle, Shield, Radio } from 'lucide-react';
 
 const ModernStory = ({ onBack }) => {
@@ -10,6 +11,7 @@ const ModernStory = ({ onBack }) => {
     survival: 50,
     truth: 50
   });
+  const [showHistoricalInfo, setShowHistoricalInfo] = useState(false);
 
   const updateStats = (statChanges) => {
     setStats(prev => ({
@@ -588,26 +590,37 @@ useEffect(() => {
             )}
 
             {/* Ending Actions */}
-            {currentSceneData.isEnding && (
-              <div className="mt-8 flex gap-4">
-                <button
-                  onClick={() => {
-                    setCurrentScene('intro');
-                    setChoices([]);
-                    setStats({ duty: 50, survival: 50, truth: 50 });
-                  }}
-                  className="flex-1 px-6 py-3 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all duration-300"
-                >
-                  Play Again
-                </button>
-                <button
-                  onClick={onBack}
-                  className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-all duration-300"
-                >
-                  Choose Different Timeline
-                </button>
-              </div>
-            )}
+{currentSceneData.isEnding && (
+  <div className="mt-8 space-y-4">
+    {/* Learn More Button */}
+    <button
+      onClick={() => setShowHistoricalInfo(true)}
+      className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-serif font-semibold rounded-lg transition-all duration-300"
+    >
+      <BookOpen className="w-5 h-5" />
+      Learn About the Real History
+    </button>
+    
+    <div className="flex gap-4">
+      <button
+        onClick={() => {
+          setCurrentScene('intro');
+          setChoices([]);
+          setStats({  duty: 50, survival: 50, truth: 50});
+        }}
+        className="flex-1 px-6 py-3 bg-amber-700 hover:bg-amber-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
+      >
+        Play Again
+      </button>
+      <button
+        onClick={onBack}
+        className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
+      >
+        Choose Different Timeline
+      </button>
+    </div>
+  </div>
+)}
             {/* Comments Section */}
 {currentSceneData.isEnding && (
   <CommentsSection 
@@ -633,6 +646,12 @@ useEffect(() => {
           </div>
         )}
       </div>
+      {/* Historical Info Modal */}
+      <HistoricalInfoModal 
+        isOpen={showHistoricalInfo}
+        onClose={() => setShowHistoricalInfo(false)}
+        storyId="modern-chernobyl"
+      />
     </div>
   );
 };
