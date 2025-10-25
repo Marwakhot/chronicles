@@ -1,14 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ArrowLeft, User, Award, BookOpen, TrendingUp, Edit2, Save, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, User, Award, BookOpen, TrendingUp, Edit2, Save, X, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const ProfilePage = ({ onBack }) => {
   const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [bio, setBio] = useState(user?.profile?.bio || '');
+  const [bio, setBio] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Update bio when user data changes
+  useEffect(() => {
+    if (user?.profile?.bio) {
+      setBio(user.profile.bio);
+    }
+  }, [user]);
 
   if (!user) {
     return (
@@ -22,10 +30,13 @@ const ProfilePage = ({ onBack }) => {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveSuccess(false);
     const result = await updateProfile(bio, user.profile?.avatar);
     setSaving(false);
     if (result.success) {
       setIsEditing(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     }
   };
 
@@ -51,6 +62,14 @@ const ProfilePage = ({ onBack }) => {
           <ArrowLeft className="w-5 h-5" />
           <span>Back</span>
         </button>
+
+        {/* Success message */}
+        {saveSuccess && (
+          <div className="mb-4 p-4 bg-green-900/40 border border-green-700/50 rounded-lg flex items-center gap-3 animate-fade-in">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            <span className="text-green-300">Profile updated successfully!</span>
+          </div>
+        )}
 
         <div className="bg-gradient-to-br from-stone-900/80 to-amber-950/60 backdrop-blur-sm border-2 border-amber-800/60 rounded-xl p-8 mb-8">
           <div className="flex items-start gap-6">
@@ -78,19 +97,27 @@ const ProfilePage = ({ onBack }) => {
 
               {isEditing ? (
                 <div className="space-y-3">
-                  <textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Tell your story..."
-                    className="w-full px-4 py-3 bg-stone-800/50 border border-amber-800/40 rounded-lg text-amber-100 placeholder-amber-600 focus:outline-none focus:border-amber-600 transition-colors resize-none"
-                    rows="4"
-                    maxLength={200}
-                  />
+                  <div>
+                    <label className="block text-amber-300 text-sm font-medium mb-2">
+                      Bio (max 200 characters)
+                    </label>
+                    <textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value.slice(0, 200))}
+                      placeholder="Tell your story..."
+                      className="w-full px-4 py-3 bg-stone-800/50 border border-amber-800/40 rounded-lg text-amber-100 placeholder-amber-600 focus:outline-none focus:border-amber-600 transition-colors resize-none"
+                      rows="4"
+                      maxLength={200}
+                    />
+                    <div className="text-right text-amber-400/60 text-xs mt-1">
+                      {bio.length}/200 characters
+                    </div>
+                  </div>
                   <div className="flex gap-3">
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg transition-all disabled:opacity-50"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save className="w-4 h-4" />
                       {saving ? 'Saving...' : 'Save'}
@@ -108,9 +135,11 @@ const ProfilePage = ({ onBack }) => {
                   </div>
                 </div>
               ) : (
-                <p className="text-amber-200 text-lg">
-                  {user.profile?.bio || 'No bio yet. Click "Edit Profile" to add one!'}
-                </p>
+                <div className="bg-stone-800/30 border border-amber-800/30 rounded-lg p-4">
+                  <p className="text-amber-200 text-lg">
+                    {user.profile?.bio || 'No bio yet. Click "Edit Profile" to add one!'}
+                  </p>
+                </div>
               )}
 
               <div className="mt-4 text-amber-400/60 text-sm">
@@ -185,6 +214,23 @@ const ProfilePage = ({ onBack }) => {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
