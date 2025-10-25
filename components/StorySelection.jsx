@@ -6,7 +6,7 @@ import IndustrialStory from './IndustrialStory';
 import ExplorationStory from './ExplorationStory';
 import ModernStory from './ModernStory';
 
-const StorySelection = ({ timeline, onBack }) => {
+const StorySelection = ({ timeline, onBack, onBackToTimeline }) => {
   const [selectedStory, setSelectedStory] = useState(null);
 
   const stories = {
@@ -80,7 +80,7 @@ const StorySelection = ({ timeline, onBack }) => {
     const StoryComponent = selectedStory.component;
     return <StoryComponent 
       onBack={() => setSelectedStory(null)} 
-      onBackToTimeline={onBack}
+      onBackToTimeline={onBackToTimeline}
     />;
   }
   return (
