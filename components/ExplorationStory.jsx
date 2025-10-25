@@ -21,10 +21,10 @@ const ExplorationStory = ({ onBack }) => {
   const { saveProgress, isAuthenticated } = useAuth();
 
 useEffect(() => {
-  if (isAuthenticated && currentScene === 'intro') {
+  if (isAuthenticated && currentScene === 'intro' && choices.length === 0) {
     saveProgress('exploration-conquest', null, [], stats);
   }
-}, [isAuthenticated]);
+}, [isAuthenticated, currentScene]);
 
   const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
   const newChoices = [...choices, choiceText];
