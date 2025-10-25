@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Compass, Heart, Skull, AlertTriangle, Ship } from 'lucide-react';
 
 const ExplorationStory = ({ onBack }) => {
