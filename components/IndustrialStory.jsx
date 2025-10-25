@@ -1001,6 +1001,13 @@ useEffect(() => {
                 </button>
               </div>
             )}
+            {/* Comments Section */}
+{currentSceneData.isEnding && (
+  <CommentsSection 
+  storyId="industrial-revolution" 
+  storyTitle="Voices of the Factory"
+/>
+)}
           </div>
         </div>
 
