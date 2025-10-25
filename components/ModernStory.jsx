@@ -22,10 +22,10 @@ const ModernStory = ({ onBack }) => {
   const { saveProgress, isAuthenticated } = useAuth();
 
 useEffect(() => {
-  if (isAuthenticated && currentScene === 'intro') {
-    saveProgress('YOUR-STORY-ID', null, [], stats);
+  if (isAuthenticated && currentScene === 'intro' && choices.length === 0) {
+    saveProgress('modern-chernobyl', null, [], stats);
   }
-}, [isAuthenticated]);
+}, [isAuthenticated, currentScene]);
 
 
   const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
@@ -37,11 +37,14 @@ useEffect(() => {
   
   if (isAuthenticated) {
     const newStats = {
-      duty: Math.max(0, Math.min(100, stats.duty + (statChanges.duty || 0))),
-      survival: Math.max(0, Math.min(100, stats.survival + (statChanges.survival || 0))),
-      truth: Math.max(0, Math.min(100, stats.truth + (statChanges.truth || 0)))
+      // USE THE CORRECT STAT NAMES FOR EACH STORY
+      statName1: Math.max(0, Math.min(100, stats.statName1 + (statChanges.statName1 || 0))),
+      statName2: Math.max(0, Math.min(100, stats.statName2 + (statChanges.statName2 || 0))),
+      statName3: Math.max(0, Math.min(100, stats.statName3 + (statChanges.statName3 || 0)))
     };
+    
     const nextSceneData = scenes[nextScene];
+    
     if (nextSceneData?.isEnding) {
       await saveProgress('modern-chernobyl', nextScene, newChoices, newStats);
     } else {
