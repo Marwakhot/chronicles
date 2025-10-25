@@ -22,10 +22,10 @@ const MedievalStory = ({ onBack }) => {
   const { saveProgress, isAuthenticated } = useAuth();
 
 useEffect(() => {
-  if (isAuthenticated && currentScene === 'intro') {
+  if (isAuthenticated && currentScene === 'intro' && choices.length === 0) {
     saveProgress('medieval-plague', null, [], stats);
   }
-}, [isAuthenticated]);
+}, [isAuthenticated, currentScene]);
 
 
   const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
