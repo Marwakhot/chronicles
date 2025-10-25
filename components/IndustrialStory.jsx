@@ -1,7 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 import HistoricalInfoModal from './HistoricalInfoModal';
-import { ArrowLeft, Zap, Heart, AlertTriangle, Shield, Radio, BookOpen, Info } from 'lucide-react';
+import CommentsSection from './CommentsSection';
+import { ArrowLeft, Heart, Skull, AlertTriangle, Hammer, BookOpen, Info } from 'lucide-react';
 
 const IndustrialStory = ({ onBack }) => {
   const [currentScene, setCurrentScene] = useState('intro');
@@ -832,7 +833,7 @@ useEffect(() => {
           <div>
             <div className="flex items-center justify-between mb-1">
               <span className="text-gray-300 text-sm flex items-center gap-2">
-                <Factory className="w-4 h-4" />
+                <Hammer className="w-4 h-4" />
                 Solidarity
               </span>
               <span className="text-gray-200 text-sm font-bold">{stats.solidarity}%</span>
