@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
+import CommentsSection from './CommentsSection';
 import { ArrowLeft, Scroll, Heart, Skull, Crown, AlertTriangle } from 'lucide-react';
 
 const AncientStory = ({ onBack }) => {
@@ -1165,6 +1166,13 @@ useEffect(() => {
                   Choose Different Timeline
                 </button>
               </div>
+            )}
+            {/* Comments Section */}
+            {currentSceneData.isEnding && (
+              <CommentsSection 
+                storyId="ancient-caesar" 
+                storyTitle="Julius Caesar's Assassination"
+              />
             )}
           </div>
         </div>
