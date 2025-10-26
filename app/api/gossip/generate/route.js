@@ -1,4 +1,4 @@
-// app/api/gossip/generate/route.js - WORKING VERSION
+// app/api/gossip/generate/route.js - WORKING VERSION WITHOUT CRON SECRET
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db';
 
@@ -84,8 +84,6 @@ async function analyzePlayerBehavior(user, userProgress) {
   
   console.log('Analyzing user:', user.username, 'Stats:', stats);
   
-  // SIMPLIFIED: Just generate gossip based on clear stats
-  
   // New player (just started)
   if (stats.totalChoices >= 1 && stats.totalChoices <= 5) {
     gossipItems.push(generateGossipItem('newPlayer'));
@@ -125,12 +123,10 @@ async function analyzePlayerBehavior(user, userProgress) {
     
     userProgress.forEach(p => {
       if (p.stats) {
-        // Check for loyalty-type stats
         if (p.stats.statName1 !== undefined) {
           loyaltySum += p.stats.statName1;
           loyaltyCount++;
         }
-        // Check for compassion-type stats
         if (p.stats.statName2 !== undefined) {
           compassionSum += p.stats.statName2;
           compassionCount++;
@@ -143,12 +139,10 @@ async function analyzePlayerBehavior(user, userProgress) {
     
     console.log('Avg loyalty:', avgLoyalty, 'Avg compassion:', avgCompassion);
     
-    // High betrayal (low loyalty)
     if (loyaltyCount > 3 && avgLoyalty < 40) {
       gossipItems.push(generateGossipItem('highBetrayal'));
     }
     
-    // Low compassion
     if (compassionCount > 3 && avgCompassion < 40) {
       gossipItems.push(generateGossipItem('lowCompassion'));
     }
@@ -160,28 +154,15 @@ async function analyzePlayerBehavior(user, userProgress) {
 
 export async function POST(request) {
   try {
-    // CHECK FOR CRON SECRET
-    const { searchParams } = new URL(request.url);
-    const cronSecret = searchParams.get('cron_secret');
-    
-    const expectedSecret = process.env.CRON_SECRET || 'dev-secret-change-in-production';
-    if (cronSecret !== expectedSecret) {
-      console.log('Unauthorized gossip generation attempt');
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-    
-    console.log('Gossip generation started');
+    console.log('Gossip generation started (manual trigger)');
     
     const users = await getCollection('users');
     const progress = await getCollection('progress');
     const gossip = await getCollection('gossip');
     
-    // Get ALL users (not just those with >5 choices)
+    // Get ALL users with at least 1 choice
     const activeUsers = await users.find({
-      'profile.stats.totalChoices': { $gte: 1 }  // Changed from $gt: 5 to $gte: 1
+      'profile.stats.totalChoices': { $gte: 1 }
     }).toArray();
     
     console.log(`Found ${activeUsers.length} active users`);
@@ -189,7 +170,6 @@ export async function POST(request) {
     const allGossipItems = [];
     
     for (const user of activeUsers) {
-      // Get user's progress
       const userProgress = await progress.find({
         userId: user._id
       }).toArray();
