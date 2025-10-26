@@ -1,4 +1,4 @@
-// app/api/gossip/generate/route.js - COMPLETE FIXED VERSION WITH CRON SECRET
+// app/api/gossip/generate/route.js - WORKING VERSION
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db';
 
@@ -37,6 +37,16 @@ const GOSSIP_TEMPLATES = {
     "A player has restarted stories more times than a society lady changes gowns for a ball!",
     "Commitment issues, perhaps? Someone cannot seem to finish what they start.",
     "One player's journey resembles a leaf in the wind—direction entirely optional!"
+  ],
+  newPlayer: [
+    "A fresh face has joined our chronicles! How delightfully promising!",
+    "Someone new is making their first choices in history. How will they fare?",
+    "A newcomer walks the halls of time. Will they rise to greatness or fall to folly?"
+  ],
+  activePlayer: [
+    "Someone has been quite busy rewriting history! Such dedication to the craft!",
+    "A particular player seems unable to stop their temporal adventures. Addicted, perhaps?",
+    "One does wonder if a certain chronicler has forgotten what daylight looks like!"
   ]
 };
 
@@ -61,7 +71,9 @@ function getSeverity(type) {
     achievementHunter: 'impressive',
     bingePlayer: 'impressive',
     speedRunner: 'curious',
-    indecisive: 'amusing'
+    indecisive: 'amusing',
+    newPlayer: 'intriguing',
+    activePlayer: 'impressive'
   };
   return severityMap[type] || 'intriguing';
 }
@@ -72,66 +84,86 @@ async function analyzePlayerBehavior(user, userProgress) {
   
   console.log('Analyzing user:', user.username, 'Stats:', stats);
   
-  // Calculate average stats from progress
-  let totalStats = { stat1: 0, stat2: 0, stat3: 0 };
-  let statCounts = { stat1: 0, stat2: 0, stat3: 0 };
+  // SIMPLIFIED: Just generate gossip based on clear stats
   
-  userProgress.forEach(p => {
-    if (p.stats) {
-      // Handle different stat naming patterns
-      ['statName1', 'statName2', 'statName3', 'loyalty', 'morality', 'compassion', 'faith', 'humanity'].forEach(statKey => {
-        if (p.stats[statKey] !== undefined) {
-          totalStats.stat1 += p.stats[statKey];
-          statCounts.stat1++;
-        }
-      });
-    }
-  });
-  
-  const avgStat1 = statCounts.stat1 > 0 ? totalStats.stat1 / statCounts.stat1 : 50;
-  
-  console.log('Average stat1:', avgStat1, 'from', statCounts.stat1, 'measurements');
-  
-  // High betrayal detection (low loyalty stat)
-  if (stats.totalChoices > 10 && avgStat1 < 35) {
-    gossipItems.push(generateGossipItem('highBetrayal'));
+  // New player (just started)
+  if (stats.totalChoices >= 1 && stats.totalChoices <= 5) {
+    gossipItems.push(generateGossipItem('newPlayer'));
   }
   
-  // Low compassion detection
-  if (stats.totalChoices > 10 && avgStat1 < 30) {
-    gossipItems.push(generateGossipItem('lowCompassion'));
+  // Active player (many choices)
+  if (stats.totalChoices > 15) {
+    gossipItems.push(generateGossipItem('activePlayer'));
   }
   
-  // Achievement hunter (many endings)
-  if (stats.endingsUnlocked?.length >= 3) {
+  // Achievement hunter (unlocked endings)
+  if (stats.endingsUnlocked?.length >= 2) {
     gossipItems.push(generateGossipItem('achievementHunter'));
   }
   
-  // Binge player (many stories finished)
+  // Binge player (finished multiple stories)
   if (stats.storiesFinished >= 2) {
     gossipItems.push(generateGossipItem('bingePlayer'));
   }
   
   // Speed runner (many choices but few finishes)
-  if (stats.totalChoices > 30 && stats.storiesFinished < 2) {
+  if (stats.totalChoices > 20 && stats.storiesFinished < 2) {
     gossipItems.push(generateGossipItem('speedRunner'));
   }
   
-  // Indecisive (many starts, few finishes)
-  if (stats.storiesStarted > 3 && stats.storiesFinished < 2) {
+  // Indecisive (started many but finished few)
+  if (stats.storiesStarted >= 3 && stats.storiesFinished < 1) {
     gossipItems.push(generateGossipItem('indecisive'));
   }
   
+  // Calculate stats for betrayal/compassion
+  if (userProgress.length > 0) {
+    let loyaltySum = 0;
+    let compassionSum = 0;
+    let loyaltyCount = 0;
+    let compassionCount = 0;
+    
+    userProgress.forEach(p => {
+      if (p.stats) {
+        // Check for loyalty-type stats
+        if (p.stats.statName1 !== undefined) {
+          loyaltySum += p.stats.statName1;
+          loyaltyCount++;
+        }
+        // Check for compassion-type stats
+        if (p.stats.statName2 !== undefined) {
+          compassionSum += p.stats.statName2;
+          compassionCount++;
+        }
+      }
+    });
+    
+    const avgLoyalty = loyaltyCount > 0 ? loyaltySum / loyaltyCount : 50;
+    const avgCompassion = compassionCount > 0 ? compassionSum / compassionCount : 50;
+    
+    console.log('Avg loyalty:', avgLoyalty, 'Avg compassion:', avgCompassion);
+    
+    // High betrayal (low loyalty)
+    if (loyaltyCount > 3 && avgLoyalty < 40) {
+      gossipItems.push(generateGossipItem('highBetrayal'));
+    }
+    
+    // Low compassion
+    if (compassionCount > 3 && avgCompassion < 40) {
+      gossipItems.push(generateGossipItem('lowCompassion'));
+    }
+  }
+  
+  console.log(`Generated ${gossipItems.length} gossip items for ${user.username}`);
   return gossipItems;
 }
 
 export async function POST(request) {
   try {
-    // CHECK FOR CRON SECRET - THIS IS THE NEW PART
+    // CHECK FOR CRON SECRET
     const { searchParams } = new URL(request.url);
     const cronSecret = searchParams.get('cron_secret');
     
-    // Only allow requests with correct secret (from Vercel cron) or from localhost dev
     const expectedSecret = process.env.CRON_SECRET || 'dev-secret-change-in-production';
     if (cronSecret !== expectedSecret) {
       console.log('Unauthorized gossip generation attempt');
@@ -147,9 +179,9 @@ export async function POST(request) {
     const progress = await getCollection('progress');
     const gossip = await getCollection('gossip');
     
-    // Get all users with activity
+    // Get ALL users (not just those with >5 choices)
     const activeUsers = await users.find({
-      'profile.stats.totalChoices': { $gt: 5 }
+      'profile.stats.totalChoices': { $gte: 1 }  // Changed from $gt: 5 to $gte: 1
     }).toArray();
     
     console.log(`Found ${activeUsers.length} active users`);
@@ -170,6 +202,13 @@ export async function POST(request) {
     
     console.log(`Generated ${allGossipItems.length} total gossip items`);
     
+    // If no gossip generated, create some generic ones
+    if (allGossipItems.length === 0) {
+      console.log('No gossip generated, adding generic items');
+      allGossipItems.push(generateGossipItem('newPlayer'));
+      allGossipItems.push(generateGossipItem('activePlayer'));
+    }
+    
     // Clear old gossip (keep last 50)
     const oldGossip = await gossip.find({}).sort({ createdAt: -1 }).skip(50).toArray();
     if (oldGossip.length > 0) {
@@ -187,6 +226,8 @@ export async function POST(request) {
         createdAt: new Date(),
         edition: new Date().toISOString().split('T')[0]
       })));
+      
+      console.log(`Stored ${itemsToStore.length} gossip items`);
     }
     
     return NextResponse.json({
