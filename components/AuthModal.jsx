@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
+const AuthModal = ({ isOpen, onClose, mode: initialMode = 'login' }) => {
   const [mode, setMode] = useState(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,6 +12,17 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, signup } = useAuth();
+
+  // Update mode when initialMode changes
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setError('');
+      setEmail('');
+      setPassword('');
+      setUsername('');
+    }
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 
