@@ -9,13 +9,15 @@ import TimelineSelection from '@/components/TimelineSelection';
 import StorySelection from '@/components/StorySelection';
 import AuthModal from '@/components/AuthModal';
 import ProfilePage from '@/components/ProfilePage';
-import { User, LogOut } from 'lucide-react';
+import GossipNewsletter from '@/components/GossipNewsletter';
+import { User, LogOut, Scroll } from 'lucide-react';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState('landing');
   const [selectedTimeline, setSelectedTimeline] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
+  const [showGossip, setShowGossip] = useState(false);
   const { user, logout, isAuthenticated, loading } = useAuth();
 
   const handleEnter = () => {
@@ -72,6 +74,13 @@ const handleBackToTimeline = () => {
     <main className="w-full min-h-screen relative">
       {currentPage !== 'landing' && (
         <div className="fixed top-4 left-4 z-50 flex items-center gap-3">
+          <button
+          onClick={() => setShowGossip(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-700 to-red-700 hover:from-amber-600 hover:to-red-600 text-white rounded-lg transition-all duration-300 shadow-lg"
+        >
+          <Scroll className="w-5 h-5" />
+          <span className="font-semibold">The Gazette</span>
+        </button>
           {isAuthenticated ? (
             <>
               <button
@@ -118,6 +127,7 @@ const handleBackToTimeline = () => {
         onClose={() => setShowAuthModal(false)}
         initialMode={authMode}
       />
+          <GossipNewsletter isOpen={showGossip} onClose={() => setShowGossip(false)} />
     </main>
   );
 }
