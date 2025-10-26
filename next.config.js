@@ -4,9 +4,6 @@ const nextConfig = {
   images: {
     domains: [],
   },
-  // Add Netlify-specific config
-  trailingSlash: true,
-  target: 'serverless'
 }
 
 module.exports = nextConfig
