@@ -1,4 +1,4 @@
-// app/api/gossip/generate/route.js - WORKING VERSION WITHOUT CRON SECRET
+// app/api/gossip/generate/route.js - FIXED VERSION
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db';
 
@@ -114,37 +114,56 @@ async function analyzePlayerBehavior(user, userProgress) {
     gossipItems.push(generateGossipItem('indecisive'));
   }
   
-  // Calculate stats for betrayal/compassion
+  // Calculate stats for betrayal/compassion/survival - FIXED
   if (userProgress.length > 0) {
-    let loyaltySum = 0;
-    let compassionSum = 0;
-    let loyaltyCount = 0;
-    let compassionCount = 0;
+    let stat1Sum = 0;  // For loyalty/solidarity/duty/faith
+    let stat2Sum = 0;  // For compassion/courage/morality/survival
+    let stat3Sum = 0;  // For survival/influence/truth
+    let stat1Count = 0;
+    let stat2Count = 0;
+    let stat3Count = 0;
     
     userProgress.forEach(p => {
       if (p.stats) {
-        if (p.stats.statName1 !== undefined) {
-          loyaltySum += p.stats.statName1;
-          loyaltyCount++;
+        // Check for statName1 (loyalty-type stats)
+        if (p.stats.statName1 !== undefined && p.stats.statName1 !== null) {
+          stat1Sum += p.stats.statName1;
+          stat1Count++;
         }
-        if (p.stats.statName2 !== undefined) {
-          compassionSum += p.stats.statName2;
-          compassionCount++;
+        // Check for statName2 (compassion-type stats)
+        if (p.stats.statName2 !== undefined && p.stats.statName2 !== null) {
+          stat2Sum += p.stats.statName2;
+          stat2Count++;
+        }
+        // Check for statName3 (survival-type stats)
+        if (p.stats.statName3 !== undefined && p.stats.statName3 !== null) {
+          stat3Sum += p.stats.statName3;
+          stat3Count++;
         }
       }
     });
     
-    const avgLoyalty = loyaltyCount > 0 ? loyaltySum / loyaltyCount : 50;
-    const avgCompassion = compassionCount > 0 ? compassionSum / compassionCount : 50;
+    const avgStat1 = stat1Count > 0 ? stat1Sum / stat1Count : 50;
+    const avgStat2 = stat2Count > 0 ? stat2Sum / stat2Count : 50;
+    const avgStat3 = stat3Count > 0 ? stat3Sum / stat3Count : 50;
     
-    console.log('Avg loyalty:', avgLoyalty, 'Avg compassion:', avgCompassion);
+    console.log('Avg stat1 (loyalty):', avgStat1, 'Count:', stat1Count);
+    console.log('Avg stat2 (compassion):', avgStat2, 'Count:', stat2Count);
+    console.log('Avg stat3 (survival):', avgStat3, 'Count:', stat3Count);
     
-    if (loyaltyCount > 3 && avgLoyalty < 40) {
+    // High betrayal (low loyalty) - need at least 3 progress entries
+    if (stat1Count >= 3 && avgStat1 < 40) {
       gossipItems.push(generateGossipItem('highBetrayal'));
     }
     
-    if (compassionCount > 3 && avgCompassion < 40) {
+    // Low compassion - need at least 3 progress entries
+    if (stat2Count >= 3 && avgStat2 < 40) {
       gossipItems.push(generateGossipItem('lowCompassion'));
+    }
+    
+    // High survival (prioritizing survival) - need at least 3 progress entries
+    if (stat3Count >= 3 && avgStat3 > 60) {
+      gossipItems.push(generateGossipItem('highSurvival'));
     }
   }
   
