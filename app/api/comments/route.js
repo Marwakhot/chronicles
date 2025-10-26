@@ -1,4 +1,4 @@
-// app/api/comments/route.js
+// app/api/comments/route.js - UPDATED WITH LIKE & REPLY
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth';
@@ -19,14 +19,29 @@ export async function GET(request) {
 
     const comments = await getCollection('comments');
     const storyComments = await comments
-      .find({ storyId })
+      .find({ storyId, parentId: null }) // Only get top-level comments
       .sort({ createdAt: -1 })
       .limit(100)
       .toArray();
 
+    // Get replies for each comment
+    const commentsWithReplies = await Promise.all(
+      storyComments.map(async (comment) => {
+        const replies = await comments
+          .find({ parentId: comment._id.toString() })
+          .sort({ createdAt: 1 })
+          .toArray();
+        
+        return {
+          ...comment,
+          replies: replies
+        };
+      })
+    );
+
     return NextResponse.json({
       success: true,
-      comments: storyComments
+      comments: commentsWithReplies
     });
 
   } catch (error) {
@@ -38,7 +53,7 @@ export async function GET(request) {
   }
 }
 
-// POST a new comment
+// POST a new comment or reply
 export async function POST(request) {
   try {
     const userId = getUserFromRequest(request);
@@ -50,7 +65,7 @@ export async function POST(request) {
       );
     }
 
-    const { storyId, comment } = await request.json();
+    const { storyId, comment, parentId } = await request.json();
 
     if (!storyId || !comment || comment.trim().length === 0) {
       return NextResponse.json(
@@ -83,6 +98,7 @@ export async function POST(request) {
       userId: new ObjectId(userId),
       username: user.username,
       comment: comment.trim(),
+      parentId: parentId || null,
       createdAt: new Date(),
       likes: 0,
       likedBy: []
@@ -147,7 +163,9 @@ export async function DELETE(request) {
       );
     }
 
+    // Delete the comment and all its replies
     await comments.deleteOne({ _id: new ObjectId(commentId) });
+    await comments.deleteMany({ parentId: commentId });
 
     return NextResponse.json({
       success: true,
@@ -156,6 +174,78 @@ export async function DELETE(request) {
 
   } catch (error) {
     console.error('Comments DELETE error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH - Toggle like on a comment
+export async function PATCH(request) {
+  try {
+    const userId = getUserFromRequest(request);
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Please sign in to like comments' },
+        { status: 401 }
+      );
+    }
+
+    const { commentId } = await request.json();
+
+    if (!commentId) {
+      return NextResponse.json(
+        { error: 'Comment ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const comments = await getCollection('comments');
+    const comment = await comments.findOne({ _id: new ObjectId(commentId) });
+
+    if (!comment) {
+      return NextResponse.json(
+        { error: 'Comment not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if user already liked the comment
+    const hasLiked = comment.likedBy.includes(userId);
+
+    if (hasLiked) {
+      // Unlike - remove user from likedBy array
+      await comments.updateOne(
+        { _id: new ObjectId(commentId) },
+        {
+          $pull: { likedBy: userId },
+          $inc: { likes: -1 }
+        }
+      );
+    } else {
+      // Like - add user to likedBy array
+      await comments.updateOne(
+        { _id: new ObjectId(commentId) },
+        {
+          $addToSet: { likedBy: userId },
+          $inc: { likes: 1 }
+        }
+      );
+    }
+
+    // Get updated comment
+    const updatedComment = await comments.findOne({ _id: new ObjectId(commentId) });
+
+    return NextResponse.json({
+      success: true,
+      comment: updatedComment,
+      liked: !hasLiked
+    });
+
+  } catch (error) {
+    console.error('Comments PATCH error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
