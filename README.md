@@ -106,16 +106,6 @@ Students who engage with Chronicles: Rewritten will:
 8. **Reflect and Discuss**: Share thoughts in the comments
 9. **Replay for New Paths**: Explore different choices and outcomes
 
-### For Educators
-
-Chronicles: Rewritten can be integrated into history curricula:
-
-- **Pre-Reading**: Assign stories before teaching a historical period to generate interest
-- **Discussion Starters**: Use endings as prompts for classroom debates
-- **Writing Assignments**: Students reflect on their choices and compare to historical records
-- **Assessment**: Evaluate understanding through discussion of decision-making
-- **Comparative Analysis**: Students play multiple paths and analyze differences
-
 ---
 
 ## 🏛️ Story Details
@@ -192,12 +182,6 @@ Respond to the Chernobyl nuclear disaster as it unfolds in real-time. Students m
 - **Multiple Perspectives**: See events from different viewpoints
 - **Agency and Engagement**: Active participation rather than passive reading
 
-### For Educators
-- **Standards-Aligned**: Covers major historical periods in approved curricula
-- **Discussion Generator**: Provides rich material for classroom debates
-- **Differentiated Learning**: Visual, interactive approach reaches diverse learners
-- **Assessment Tool**: Observe student reasoning through their choices
-
 ### For Lifelong Learners
 - **Accessible History**: Complex events made engaging and understandable
 - **Moral Reflection**: Safe space to explore difficult ethical questions
@@ -239,33 +223,6 @@ npm run dev
 
 ---
 
-## 🎯 Future Development
-
-- [ ] Additional stories in each historical period
-- [ ] Teacher dashboard with student progress tracking
-- [ ] Curriculum guides aligned with educational standards
-- [ ] Classroom discussion guides for each story
-- [ ] Achievement system with historical context
-- [ ] Multiplayer discussion features
-- [ ] Mobile app versions
-- [ ] Additional languages for international reach
-- [ ] Accessibility improvements (screen reader support, etc.)
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from historians, educators, writers, and developers:
-
-- **Historians**: Review accuracy and suggest new stories
-- **Educators**: Provide feedback on educational effectiveness
-- **Writers**: Help craft new narratives and branches
-- **Developers**: Improve functionality and user experience
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests.
-
----
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -275,17 +232,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 Project maintained by the Chronicles: Rewritten team.
-
-**Live Demo**: [https://chronicles-tawny.vercel.app/](https://chronicles-tawny.vercel.app/)
-
----
-
-## 🙏 Acknowledgments
-
-- Historical consultants and academic resources
-- Beta testers and educators who provided feedback
-- Open-source community for excellent tools and libraries
-- Students and teachers who inspired this project
 
 ---
 
