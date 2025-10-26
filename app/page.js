@@ -34,18 +34,18 @@ export default function Home() {
   };
 
   const handleBack = () => {
-  if (currentPage === 'stories') {
+    if (currentPage === 'stories') {
+      setCurrentPage('timeline');
+      setSelectedTimeline(null);
+    } else if (currentPage === 'profile') {
+      setCurrentPage('timeline');
+    }
+  };
+
+  const handleBackToTimeline = () => {
     setCurrentPage('timeline');
     setSelectedTimeline(null);
-  } else if (currentPage === 'profile') {
-    setCurrentPage('timeline');
-  }
-};
-
-const handleBackToTimeline = () => {
-  setCurrentPage('timeline');
-  setSelectedTimeline(null);
-};
+  };
 
   const openAuthModal = (mode) => {
     setAuthMode(mode);
@@ -73,14 +73,15 @@ const handleBackToTimeline = () => {
   return (
     <main className="w-full min-h-screen relative">
       {currentPage !== 'landing' && (
-        <div className="fixed top-4 left-4 z-50 flex items-center gap-3">
+        <div className="fixed top-4 left-4 z-50 flex flex-col gap-3">
           <button
-          onClick={() => setShowGossip(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-700 to-red-700 hover:from-amber-600 hover:to-red-600 text-white rounded-lg transition-all duration-300 shadow-lg"
-        >
-          <Scroll className="w-5 h-5" />
-          <span className="font-semibold">The Gazette</span>
-        </button>
+            onClick={() => setShowGossip(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-700 to-red-700 hover:from-amber-600 hover:to-red-600 text-white rounded-lg transition-all duration-300 shadow-lg"
+          >
+            <Scroll className="w-5 h-5" />
+            <span className="font-semibold">The Gazette</span>
+          </button>
+          
           {isAuthenticated ? (
             <>
               <button
@@ -95,6 +96,7 @@ const handleBackToTimeline = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-stone-700 hover:bg-stone-600 text-white rounded-lg transition-all duration-300 shadow-lg"
               >
                 <LogOut className="w-5 h-5" />
+                <span className="font-semibold">Sign Out</span>
               </button>
             </>
           ) : (
@@ -125,9 +127,10 @@ const handleBackToTimeline = () => {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        initialMode={authMode}
+        mode={authMode}
       />
-          <GossipNewsletter isOpen={showGossip} onClose={() => setShowGossip(false)} />
+      
+      <GossipNewsletter isOpen={showGossip} onClose={() => setShowGossip(false)} />
     </main>
   );
 }
