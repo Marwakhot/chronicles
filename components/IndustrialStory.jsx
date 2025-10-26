@@ -987,9 +987,8 @@ useEffect(() => {
             )}
 
             {/* Ending Actions */}
-{currentSceneData.isEnding && (
+            {currentSceneData.isEnding && (
   <div className="mt-8 space-y-4">
-    {/* Learn More Button */}
     <button
       onClick={() => setShowHistoricalInfo(true)}
       className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-serif font-semibold rounded-lg transition-all duration-300"
@@ -1010,7 +1009,7 @@ useEffect(() => {
         Play Again
       </button>
       <button
-        onClick={onBack}
+        onClick={onBackToTimeline}
         className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-white font-serif font-semibold rounded-lg transition-all duration-300"
       >
         Choose Different Timeline
@@ -1018,6 +1017,7 @@ useEffect(() => {
     </div>
   </div>
 )}
+        
             {/* Comments Section */}
 {currentSceneData.isEnding && (
   <CommentsSection 
