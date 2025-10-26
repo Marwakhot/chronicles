@@ -499,13 +499,15 @@ useEffect(() => {
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-blue-300 hover:text-blue-100 transition-colors mb-6"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Return to Timeline</span>
-        </button>
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-blue-300 hover:text-blue-100 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Return to Timeline</span>
+          </button>
+        </div>
 
         {/* Story Card */}
         <div className="bg-gray-900/80 backdrop-blur-sm border-2 border-blue-800/60 rounded-lg overflow-hidden shadow-2xl">
