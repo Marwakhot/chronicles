@@ -34,11 +34,11 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
 
   // NEW: Manual gossip generation
   const generateGossip = async () => {
-    setGenerating(true);
-    try {
-      const response = await fetch('/api/gossip/generate?cron_secret=dev-secret-change-in-production', {
-        method: 'POST'
-      });
+  setGenerating(true);
+  try {
+    const response = await fetch('/api/gossip/generate', {
+      method: 'POST'
+    });
       const data = await response.json();
       
       if (data.success) {
