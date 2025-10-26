@@ -6,7 +6,7 @@
   "outputDirectory": ".next",
   "crons": [
     {
-      "path": "/api/gossip/generate",
+      "path": "/api/gossip/generate?cron_secret=YOUR_SECRET_KEY_HERE",
       "schedule": "0 */3 * * *"
     }
   ]
