@@ -1,4 +1,4 @@
-// app/api/gossip/generate/route.js
+// app/api/gossip/generate/route.js - FIXED VERSION
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db';
 
@@ -66,89 +66,59 @@ function getSeverity(type) {
   return severityMap[type] || 'intriguing';
 }
 
-async function analyzePlayerBehavior(user) {
+async function analyzePlayerBehavior(user, userProgress) {
   const stats = user.profile?.stats || {};
   const gossipItems = [];
   
-  // High betrayal detection (low loyalty across stories)
-  if (stats.totalChoices > 10) {
-    const progress = await getCollection('progress');
-    const userProgress = await progress.find({ 
-      userId: user._id 
-    }).toArray();
-    
-    let avgLoyalty = 0;
-    let loyaltyCount = 0;
-    
-    userProgress.forEach(p => {
-      if (p.stats?.loyalty !== undefined) {
-        avgLoyalty += p.stats.loyalty;
-        loyaltyCount++;
-      }
-      if (p.stats?.statName1 !== undefined) {
-        avgLoyalty += p.stats.statName1;
-        loyaltyCount++;
-      }
-    });
-    
-    if (loyaltyCount > 0) {
-      avgLoyalty = avgLoyalty / loyaltyCount;
-      if (avgLoyalty < 30) {
-        gossipItems.push(generateGossipItem('highBetrayal'));
-      }
+  console.log('Analyzing user:', user.username, 'Stats:', stats);
+  
+  // Calculate average stats from progress
+  let totalStats = { stat1: 0, stat2: 0, stat3: 0 };
+  let statCounts = { stat1: 0, stat2: 0, stat3: 0 };
+  
+  userProgress.forEach(p => {
+    if (p.stats) {
+      // Handle different stat naming patterns
+      ['statName1', 'statName2', 'statName3', 'loyalty', 'morality', 'compassion', 'faith', 'humanity'].forEach(statKey => {
+        if (p.stats[statKey] !== undefined) {
+          totalStats.stat1 += p.stats[statKey];
+          statCounts.stat1++;
+        }
+      });
     }
+  });
+  
+  const avgStat1 = statCounts.stat1 > 0 ? totalStats.stat1 / statCounts.stat1 : 50;
+  
+  console.log('Average stat1:', avgStat1, 'from', statCounts.stat1, 'measurements');
+  
+  // High betrayal detection (low loyalty stat)
+  if (stats.totalChoices > 10 && avgStat1 < 35) {
+    gossipItems.push(generateGossipItem('highBetrayal'));
   }
   
   // Low compassion detection
-  if (stats.totalChoices > 10) {
-    const progress = await getCollection('progress');
-    const userProgress = await progress.find({ 
-      userId: user._id 
-    }).toArray();
-    
-    let avgCompassion = 0;
-    let compassionCount = 0;
-    
-    userProgress.forEach(p => {
-      if (p.stats?.compassion !== undefined) {
-        avgCompassion += p.stats.compassion;
-        compassionCount++;
-      }
-      if (p.stats?.humanity !== undefined) {
-        avgCompassion += p.stats.humanity;
-        compassionCount++;
-      }
-      if (p.stats?.statName2 !== undefined) {
-        avgCompassion += p.stats.statName2;
-        compassionCount++;
-      }
-    });
-    
-    if (compassionCount > 0) {
-      avgCompassion = avgCompassion / compassionCount;
-      if (avgCompassion < 25) {
-        gossipItems.push(generateGossipItem('lowCompassion'));
-      }
-    }
+  if (stats.totalChoices > 10 && avgStat1 < 30) {
+    gossipItems.push(generateGossipItem('lowCompassion'));
   }
   
-  // Achievement hunter
-  if (stats.endingsUnlocked?.length >= 5) {
+  // Achievement hunter (many endings)
+  if (stats.endingsUnlocked?.length >= 3) {
     gossipItems.push(generateGossipItem('achievementHunter'));
   }
   
-  // Binge player
-  if (stats.storiesFinished >= 3) {
+  // Binge player (many stories finished)
+  if (stats.storiesFinished >= 2) {
     gossipItems.push(generateGossipItem('bingePlayer'));
   }
   
-  // Speed runner
-  if (stats.totalChoices > 50 && stats.storiesFinished < 2) {
+  // Speed runner (many choices but few finishes)
+  if (stats.totalChoices > 30 && stats.storiesFinished < 2) {
     gossipItems.push(generateGossipItem('speedRunner'));
   }
   
-  // Indecisive
-  if (stats.storiesStarted > 5 && stats.storiesFinished < 2) {
+  // Indecisive (many starts, few finishes)
+  if (stats.storiesStarted > 3 && stats.storiesFinished < 2) {
     gossipItems.push(generateGossipItem('indecisive'));
   }
   
@@ -157,7 +127,10 @@ async function analyzePlayerBehavior(user) {
 
 export async function POST(request) {
   try {
+    console.log('Gossip generation started');
+    
     const users = await getCollection('users');
+    const progress = await getCollection('progress');
     const gossip = await getCollection('gossip');
     
     // Get all users with activity
@@ -170,13 +143,30 @@ export async function POST(request) {
     const allGossipItems = [];
     
     for (const user of activeUsers) {
-      const gossipItems = await analyzePlayerBehavior(user);
+      // Get user's progress
+      const userProgress = await progress.find({
+        userId: user._id
+      }).toArray();
+      
+      console.log(`User ${user.username} has ${userProgress.length} progress entries`);
+      
+      const gossipItems = await analyzePlayerBehavior(user, userProgress);
       allGossipItems.push(...gossipItems);
     }
     
-    // Store gossip items (limit to 10)
+    console.log(`Generated ${allGossipItems.length} total gossip items`);
+    
+    // Clear old gossip (keep last 50)
+    const oldGossip = await gossip.find({}).sort({ createdAt: -1 }).skip(50).toArray();
+    if (oldGossip.length > 0) {
+      await gossip.deleteMany({
+        _id: { $in: oldGossip.map(g => g._id) }
+      });
+    }
+    
+    // Store new gossip items (limit to 20)
     if (allGossipItems.length > 0) {
-      const itemsToStore = allGossipItems.slice(0, 10);
+      const itemsToStore = allGossipItems.slice(0, 20);
       
       await gossip.insertMany(itemsToStore.map(item => ({
         ...item,
@@ -188,13 +178,14 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       gossipGenerated: allGossipItems.length,
-      message: `Generated ${allGossipItems.length} gossip items`
+      activeUsers: activeUsers.length,
+      message: `Generated ${allGossipItems.length} gossip items from ${activeUsers.length} users`
     });
     
   } catch (error) {
     console.error('Gossip generation error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate gossip' },
+      { error: 'Failed to generate gossip', details: error.message },
       { status: 500 }
     );
   }
