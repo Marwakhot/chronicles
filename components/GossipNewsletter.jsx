@@ -1,12 +1,13 @@
-// components/GossipNewsletter.jsx
+// components/GossipNewsletter.jsx - ADD MANUAL TRIGGER
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Scroll, Sparkles, Clock, X, RefreshCw } from 'lucide-react';
+import { Scroll, Sparkles, Clock, X, RefreshCw, Zap } from 'lucide-react';
 
 const GossipNewsletter = ({ isOpen, onClose }) => {
   const [gossipItems, setGossipItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [edition, setEdition] = useState('');
 
   useEffect(() => {
@@ -29,6 +30,28 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
       console.error('Failed to fetch gossip:', error);
     }
     setLoading(false);
+  };
+
+  // NEW: Manual gossip generation
+  const generateGossip = async () => {
+    setGenerating(true);
+    try {
+      const response = await fetch('/api/gossip/generate?cron_secret=dev-secret-change-in-production', {
+        method: 'POST'
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Gossip generated:', data);
+        // Wait a moment then refresh
+        setTimeout(() => {
+          fetchGossip();
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Failed to generate gossip:', error);
+    }
+    setGenerating(false);
   };
 
   if (!isOpen) return null;
@@ -86,13 +109,24 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
               <Clock className="w-4 h-4" />
               <span>Edition: {edition}</span>
             </div>
-            <button
-              onClick={fetchGossip}
-              className="flex items-center gap-2 px-3 py-1 bg-amber-800/30 hover:bg-amber-800/50 rounded transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span className="text-xs">Refresh</span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={fetchGossip}
+                className="flex items-center gap-2 px-3 py-1 bg-amber-800/30 hover:bg-amber-800/50 rounded transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="text-xs">Refresh</span>
+              </button>
+              {/* NEW: Generate button */}
+              <button
+                onClick={generateGossip}
+                disabled={generating}
+                className="flex items-center gap-2 px-3 py-1 bg-green-800/30 hover:bg-green-800/50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Zap className="w-4 h-4" />
+                <span className="text-xs">{generating ? 'Generating...' : 'Generate New'}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -106,9 +140,16 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
           ) : gossipItems.length === 0 ? (
             <div className="text-center py-12">
               <Scroll className="w-16 h-16 text-amber-600/40 mx-auto mb-4" />
-              <p className="text-amber-400/60 text-lg">
-                No gossip yet! Play more stories to generate juicy rumors.
+              <p className="text-amber-400/60 text-lg mb-4">
+                No gossip yet! Play more stories or click "Generate New" to create juicy rumors.
               </p>
+              <button
+                onClick={generateGossip}
+                disabled={generating}
+                className="px-6 py-3 bg-gradient-to-r from-amber-700 to-red-700 hover:from-amber-600 hover:to-red-600 text-white rounded-lg transition-all disabled:opacity-50"
+              >
+                {generating ? 'Generating Gossip...' : 'Generate Gossip Now'}
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
