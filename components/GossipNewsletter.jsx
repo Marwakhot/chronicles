@@ -1,4 +1,3 @@
-// components/GossipNewsletter.jsx - ADD MANUAL TRIGGER
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -16,10 +15,10 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  const fetchGossip = async () => {
+  const fetchGossip = async (limit = 10) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/gossip?limit=20');
+      const response = await fetch(`/api/gossip?limit=${limit}`);
       const data = await response.json();
       
       if (data.success) {
@@ -32,26 +31,28 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
     setLoading(false);
   };
 
-  // NEW: Manual gossip generation
   const generateGossip = async () => {
-  setGenerating(true);
-  try {
-    const response = await fetch('/api/gossip/generate', {
-      method: 'POST'
-    });
+    setGenerating(true);
+    try {
+      const response = await fetch('/api/gossip/generate', {
+        method: 'POST'
+      });
       const data = await response.json();
       
       if (data.success) {
         console.log('Gossip generated:', data);
-        // Wait a moment then refresh
         setTimeout(() => {
-          fetchGossip();
+          fetchGossip(10);
         }, 500);
       }
     } catch (error) {
       console.error('Failed to generate gossip:', error);
     }
     setGenerating(false);
+  };
+
+  const updateGossip = async () => {
+    await fetchGossip(10);
   };
 
   if (!isOpen) return null;
@@ -111,20 +112,22 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={fetchGossip}
-                className="flex items-center gap-2 px-3 py-1 bg-amber-800/30 hover:bg-amber-800/50 rounded transition-colors"
+                onClick={updateGossip}
+                disabled={loading}
+                className="flex items-center gap-2 px-3 py-1 bg-blue-800/30 hover:bg-blue-800/50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Update to show latest 10 gossip items"
               >
-                <RefreshCw className="w-4 h-4" />
-                <span className="text-xs">Refresh</span>
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span className="text-xs">Update</span>
               </button>
-              {/* NEW: Generate button */}
               <button
                 onClick={generateGossip}
                 disabled={generating}
                 className="flex items-center gap-2 px-3 py-1 bg-green-800/30 hover:bg-green-800/50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Generate fresh gossip based on current player behavior"
               >
                 <Zap className="w-4 h-4" />
-                <span className="text-xs">{generating ? 'Generating...' : 'Generate New'}</span>
+                <span className="text-xs">{generating ? 'Generating...' : 'Generate Fresh'}</span>
               </button>
             </div>
           </div>
@@ -141,21 +144,21 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
             <div className="text-center py-12">
               <Scroll className="w-16 h-16 text-amber-600/40 mx-auto mb-4" />
               <p className="text-amber-400/60 text-lg mb-4">
-                No gossip yet! Play more stories or click "Generate New" to create juicy rumors.
+                No gossip yet! Play more stories or click "Generate Fresh" to create juicy rumors.
               </p>
               <button
                 onClick={generateGossip}
                 disabled={generating}
                 className="px-6 py-3 bg-gradient-to-r from-amber-700 to-red-700 hover:from-amber-600 hover:to-red-600 text-white rounded-lg transition-all disabled:opacity-50"
               >
-                {generating ? 'Generating Gossip...' : 'Generate Gossip Now'}
+                {generating ? 'Generating Gossip...' : 'Generate Fresh Gossip'}
               </button>
             </div>
           ) : (
             <div className="space-y-4">
               {gossipItems.map((item, index) => (
                 <div
-                  key={index}
+                  key={`${item._id}-${index}`}
                   className={`border-2 rounded-lg p-5 transition-all hover:scale-102 ${getSeverityColor(item.severity)}`}
                 >
                   <div className="flex items-start gap-3">
@@ -184,7 +187,8 @@ const GossipNewsletter = ({ isOpen, onClose }) => {
         <div className="bg-stone-900/60 p-4 border-t-2 border-amber-800/30 rounded-b-xl">
           <p className="text-amber-400/60 text-xs text-center italic font-serif">
             "Dear Reader, remember: All gossip is anonymous, as befits proper scandal. 
-            Your secrets are safe... mostly."
+            Your secrets are safe... mostly. Click 'Update' for the latest 10 whispers, 
+            or 'Generate Fresh' for brand new gossip!"
           </p>
         </div>
       </div>
