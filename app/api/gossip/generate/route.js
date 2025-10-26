@@ -1,4 +1,4 @@
-// app/api/gossip/generate/route.js - FIXED VERSION
+// app/api/gossip/generate/route.js - COMPLETE FIXED VERSION WITH CRON SECRET
 import { NextResponse } from 'next/server';
 import { getCollection } from '@/lib/db';
 
@@ -127,6 +127,20 @@ async function analyzePlayerBehavior(user, userProgress) {
 
 export async function POST(request) {
   try {
+    // CHECK FOR CRON SECRET - THIS IS THE NEW PART
+    const { searchParams } = new URL(request.url);
+    const cronSecret = searchParams.get('cron_secret');
+    
+    // Only allow requests with correct secret (from Vercel cron) or from localhost dev
+    const expectedSecret = process.env.CRON_SECRET || 'dev-secret-change-in-production';
+    if (cronSecret !== expectedSecret) {
+      console.log('Unauthorized gossip generation attempt');
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
     console.log('Gossip generation started');
     
     const users = await getCollection('users');
