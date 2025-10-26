@@ -755,13 +755,17 @@ const makeChoice = async (nextScene, choiceText, statChanges = {}) => {
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-purple-300 hover:text-purple-100 transition-colors mb-6"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Return to Timeline</span>
-        </button>
+        {/* Back Button - Positioned on the right to avoid overlap */}
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-purple-300 hover:text-purple-100 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Return to Timeline</span>
+          </button>
+        </div>
+
 
         {/* Story Card */}
         <div className="bg-stone-900/80 backdrop-blur-sm border-2 border-purple-800/60 rounded-lg overflow-hidden shadow-2xl">
